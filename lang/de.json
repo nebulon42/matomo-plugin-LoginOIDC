@@ -32,6 +32,8 @@
         "SettingAllowedSignupDomainsHelp": "Wenn das Feld freigelassen wird, können sich Benutzer mit beliebiger E-Mail Adresse registrieren. Mehrere Domains können in separaten Zeilen angegeben werden.",
         "SettingAutoLinking": "Aktiviere Auto Linking",
         "SettingAutoLinkingHelp": "Aktiviert Auto Linking von Accounts, die die selbe User ID in Matomo und dem OpenID Connect Provider haben.",
+        "SettingRoleMapping": "Rollen-Zuordnung",
+        "SettingRoleMappingHelp": "Beispiel: {\n    \"group_field\": \"groups\",\n    \"group_mapping\": {\n        \"super_admin\": \"/analytics/super_admin\",\n        \"websites\": [\n            {\n                \"website\": \"1\",\n                \"permission\": \"view\",\n                \"mapping\": \"/analytics/test.com/viewer\"\n            }\n        ]\n    }\n}",
         "OpenIDConnect": "OpenID Connect",
         "OIDCIntro": "Dies erlaubt es Dir, Dich über einen externen Service bei Matomo einzuloggen.",
         "AccountLinked": "Dein Account ist zur Zeit verknüpft (Entfernte Benutzer-ID: %1$s).",
@@ -47,6 +49,8 @@
         "ExceptionSuperUserOauthDisabled": "OAuth Login für Superuser ist deaktiviert.",
         "ExceptionAllowedSignupDomainsValidationFailed": "Die Liste der zugelassenen Domains hat nicht das richtige Format.",
         "ExceptionAllowedSignupDomainsDenied": "Die verwendete Domain ist nicht für Registrierungen freigeschaltet.",
-        "ExceptionAlreadyLinkedToDifferentAccount": "Der Benutzer beim OAuth-Service ist bereits mit einem anderem Matomo-Nutzer verlinkt."
+        "ExceptionAlreadyLinkedToDifferentAccount": "Der Benutzer beim OAuth-Service ist bereits mit einem anderem Matomo-Nutzer verlinkt.",
+        "ExceptionRoleMappingInvalidJson": "Die Einstellung zur Rollen-Zuordnung enthält kein valides JSON.",
+        "ExceptionRoleMappingNoGroupClaim": "Die Einstellung zur Rollen-Zuordnung enthält keine Zuordnung für das Gruppen-Feld."
     }
 }

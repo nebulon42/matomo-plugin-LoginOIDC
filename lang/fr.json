@@ -30,6 +30,8 @@
         "SettingRedirectUriOverrideHelp": "Dans certains cas, il peut être pratique de redéfinir l'URI de redirection qui est transmise au fournisseur OpenID Connect. Si vous êtes n'êtes pas sûr, laissez ce champ vide.",
         "SettingAllowedSignupDomains": "Limiter la création d'utilisateurs aux domaines",
         "SettingAllowedSignupDomainsHelp": "",
+        "SettingRoleMapping": "Mappage des rôles",
+        "SettingRoleMappingHelp": "Exemple : {\n    \"group_field\": \"groups\",\n    \"group_mapping\": {\n        \"super_admin\": \"/analytics/super_admin\",\n        \"websites\": [\n            {\n                \"website\": \"1\",\n                \"permission\": \"view\",\n                \"mapping\": \"/analytics/test.com/viewer\"\n            }\n        ]\n    }\n}",
         "OpenIDConnect": "OpenID Connect",
         "OIDCIntro": "Ceci vous permet de vous connecter à Matomo en utilisant un service d'authentification externe.",
         "AccountLinked": "Votre compte est actuellement lié (Identifiant du compte utilisateur distant : %1$s).",
@@ -45,6 +47,8 @@
         "ExceptionSuperUserOauthDisabled": "La connexion OAuth pour les Supers Utilisateurs est désactivée.",
         "ExceptionAllowedSignupDomainsValidationFailed": "La validation a échoué pour la liste des domaines autorisés pour la création d'utilisateurs.",
         "ExceptionAllowedSignupDomainsDenied": "Le domaine n'est pas activé pour la création d'un compte.",
-        "ExceptionAlreadyLinkedToDifferentAccount": "L'utilisateur OAuth distant est déjà lié à un autre compte."
+        "ExceptionAlreadyLinkedToDifferentAccount": "L'utilisateur OAuth distant est déjà lié à un autre compte.",
+        "ExceptionRoleMappingInvalidJson": "Le paramètre de mappage des rôles contient un JSON invalide.",
+        "ExceptionRoleMappingNoGroupClaim": "Le paramètre de mappage de rôle manque le mappage de réclamation de groupe."
     }
 }

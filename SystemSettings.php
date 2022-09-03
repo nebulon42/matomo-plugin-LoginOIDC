@@ -140,6 +140,13 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
     public $allowedSignupDomains;
 
     /**
+     * Role mapping as JSON.
+     * 
+     * @var string
+     */
+    public $roleMapping;
+
+    /**
      * Initialize the plugin settings.
      *
      * @return void
@@ -163,6 +170,7 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
         $this->scope = $this->createScopeSetting();
         $this->redirectUriOverride = $this->createRedirectUriOverrideSetting();
         $this->allowedSignupDomains = $this->createAllowedSignupDomainsSetting();
+        $this->roleMapping = $this->createRoleMappingSetting();
     }
 
     /**
@@ -415,6 +423,24 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
                     if (!$isValidDomain) {
                         throw new Exception(Piwik::translate("LoginOIDC_ExceptionAllowedSignupDomainsValidationFailed"));
                     }
+                }
+            };
+        });
+    }
+
+    private function createRoleMappingSetting() : SystemSetting
+    {
+        return $this->makeSetting("roleMapping", $default = "", FieldConfig::TYPE_STRING, function(FieldConfig $field) {
+            $field->title = Piwik::translate("LoginOIDC_SettingRoleMapping");
+            $field->description = Piwik::translate("LoginOIDC_SettingRoleMappingHelp");
+            $field->uiControl = FieldConfig::UI_CONTROL_TEXTAREA;
+            $field->validate = function ($value, $setting) {
+                if (empty($value)) {
+                    return;
+                }
+                $result = json_decode($value);
+                if (!$result) {
+                    throw new Exception(Piwik::translate("LoginOIDC_ExceptionRoleMappingValidationFailed"));
                 }
             };
         });

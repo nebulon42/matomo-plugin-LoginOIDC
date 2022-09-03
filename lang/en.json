@@ -34,6 +34,8 @@
         "SettingAllowedSignupDomainsHelp": "List of email domains which should be allowed to create new accounts. Multiple domains have to be separated by line breaks. When empty, any email domain will be accepted.",
         "SettingAutoLinking": "Enable auto linking",
         "SettingAutoLinkingHelp": "Enables auto linking of accounts which have the same user id in Matomo and the OIDC provider",
+        "SettingRoleMapping": "Role-Mapping",
+        "SettingRoleMappingHelp": "Example: {\n    \"group_field\": \"groups\",\n    \"group_mapping\": {\n        \"super_admin\": \"/analytics/super_admin\",\n        \"websites\": [\n            {\n                \"website\": \"1\",\n                \"permission\": \"view\",\n                \"mapping\": \"/analytics/test.com/viewer\"\n            }\n        ]\n    }\n}",
         "OpenIDConnect": "OpenID Connect",
         "OIDCIntro": "This allows you to sign in using an external authentication service.",
         "AccountLinked": "Your account is currently linked (Remote User ID: %1$s).",
@@ -49,6 +51,8 @@
         "ExceptionSuperUserOauthDisabled": "OAuth login disabled for superusers.",
         "ExceptionAllowedSignupDomainsValidationFailed": "Validation failed for the list of domains allowed for user creation.",
         "ExceptionAllowedSignupDomainsDenied": "The domain is currently not activated for account creation.",
-        "ExceptionAlreadyLinkedToDifferentAccount": "The remote OAuth user is already linked to another account."
+        "ExceptionAlreadyLinkedToDifferentAccount": "The remote OAuth user is already linked to another account.",
+        "ExceptionRoleMappingInvalidJson": "The role mapping setting contains invalid JSON.",
+        "ExceptionRoleMappingNoGroupClaim": "The role mapping setting misses the group claim mapping."
     }
 }

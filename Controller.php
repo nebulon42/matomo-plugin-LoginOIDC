@@ -250,6 +250,8 @@ class Controller extends \Piwik\Plugin\Controller
         curl_close($curl);
         $result = json_decode($response);
 
+        $_SESSION['loginoidc_userinfo'] = $result;
+
         $userinfoId = $settings->userinfoId->getValue();
         $providerUserId = $result->$userinfoId;
 
@@ -407,6 +409,7 @@ class Controller extends \Piwik\Plugin\Controller
      */
     private function signinAndRedirect(array $user, SystemSettings $settings)
     {
+        $this->setRoles($user, $settings);
         $this->auth->setLogin($user["login"]);
         $this->auth->setForceLogin(true);
         $this->sessionInitializer->initSession($this->auth);
@@ -481,6 +484,128 @@ class Controller extends \Piwik\Plugin\Controller
     {
         $sql = "SELECT user, provider_user, provider FROM " . Common::prefixTable("loginoidc_provider") . " WHERE provider=? AND user=?";
         return Db::fetchRow($sql, array($provider, Piwik::getCurrentUserLogin()));
+    }
+
+    /**
+     * Assigns the roles from the role mapping (if set) to the user.
+     *
+     * @param  array  $user
+     * @param  SystemSettings $settings
+     * @return void
+     */
+    private function setRoles(array $user, SystemSettings $settings)
+    {
+        $roleMappingSetting = $this->getRoleMapping($settings);
+        if ($roleMappingSetting) {
+            $userInfo = $_SESSION['loginoidc_userinfo'];
+            if (property_exists($userInfo, $roleMappingSetting->groupClaim)) {
+                $roles = $userInfo->{$roleMappingSetting->groupClaim};
+                if (is_array($roles)) {
+                    $userModel = new Model();
+                    if ($roleMappingSetting->superadminGroup !== null) {
+                        $isSuperadmin = in_array($roleMappingSetting->superadminGroup, $roles);
+                        $userModel->setSuperUserAccess($user['login'], $isSuperadmin);
+                    }
+                    $userAccess = $userModel->getSitesAccessFromUser($user['login']);
+                    $relevantMappings = [
+                        'view' => [],
+                        'write' => [],
+                        'admin' => []
+                    ];
+                    foreach ($roleMappingSetting->websites as $website) {
+                        if (in_array($website->mapping, $roles)) {
+                            $relevantMappings[$website->permission][] = $website;
+                        }
+                    }
+
+                    // adding roles that are not yet present on the user
+                    foreach ($relevantMappings as $permission => $mapping) {
+                        $websites = array_map(
+                            function ($item) {
+                                return $item->id;
+                            },
+                            $mapping
+                        );
+                        // checking the access items of the user for the specific permission
+                        // and removing all websites from being added that are already there
+                        foreach ($userAccess as $accessItem) {
+                            if ($accessItem['access'] !== $permission) {
+                                continue;
+                            }
+                            $idx = array_keys($websites, $accessItem['site']);
+                            foreach ($idx as $i) {
+                                unset($websites[$i]);
+                            }
+                        }
+
+                        $userModel->addUserAccess($user['login'], $permission, $websites);
+                    }
+
+                    // removing roles that are on the user but not on the OIDC provider
+                    foreach ($userAccess as $accessItem) {
+                        $mappings = $relevantMappings[$accessItem['access']];
+                        $websites = array_map(
+                            function ($item) {
+                                return $item->id;
+                            },
+                            $mappings
+                        );
+                        if (!in_array($accessItem['site'], $websites)) {
+                            $userModel->removeUserAccess($user['login'],  $accessItem['access'], [$accessItem['site']]);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private function getRoleMapping(SystemSettings $settings)
+    {
+        $permissions = ['view', 'write', 'admin'];
+
+        $roleMappingSetting = $settings->roleMapping->getValue();
+        if (!empty($roleMappingSetting)) {
+            $roleMappingSetting = json_decode($roleMappingSetting);
+            if ($roleMappingSetting !== false) {
+                $roleMapping = new \stdClass();
+                $roleMapping->groupClaim = null;
+                $roleMapping->superadminGroup = null;
+                $roleMapping->websites = [];
+
+                if (isset($roleMappingSetting->group_field)) {
+                    $roleMapping->groupClaim = $roleMappingSetting->group_field;
+                } else {
+                    throw new Exception(Piwik::translate("LoginOIDC_ExceptionRoleMappingNoGroupClaim"));
+                }
+
+                if (isset($roleMappingSetting->group_mapping->super_admin)) {
+                    $roleMapping->superadminGroup = $roleMappingSetting->group_mapping->super_admin;
+                }
+
+                if (isset($roleMappingSetting->group_mapping->websites)
+                    && is_array($roleMappingSetting->group_mapping->websites)) {
+                        foreach ($roleMappingSetting->group_mapping->websites as $website) {
+                            if (isset($website->website, $website->permission, $website->mapping)) {
+                                $site = new \stdClass();
+                                $site->id = $website->website;
+                                $site->permission = $website->permission;
+                                $site->mapping = $website->mapping;
+
+                                if (is_numeric($site->id) && in_array($site->permission, $permissions)) {
+                                    $site->id = intval($site->id);
+                                    $roleMapping->websites[] = $site;
+                                }
+                            }
+                        }
+                }
+
+                return $roleMapping;
+            } else {
+                throw new Exception(Piwik::translate("LoginOIDC_ExceptionRoleMappingInvalidJson"));
+            }
+        }
+        
+        return null;
     }
 
 }
